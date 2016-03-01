@@ -1,6 +1,5 @@
 package player.logic;
 
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
@@ -18,6 +17,13 @@ public class TrackPlayer {
         this.filepath = filepath;
         track = new Media(filepath);
         player = new MediaPlayer(track);
+
+        player.setOnReady(() -> {
+            duration = track.getDuration();
+            System.out.println("Duration: " + duration);
+        });
+
+        player.currentTimeProperty().addListener(new TimeListener());
     }
 
     public void playSong() {
@@ -55,14 +61,7 @@ public class TrackPlayer {
         player.seek(duration);
     }
 
-    public ReadOnlyObjectProperty<Duration> currentTimeProperty() {
-        return player.currentTimeProperty();
-    }
-
     public Media getMedia() {
         return player.getMedia();
-    }
-
-    public void setOnReady(Runnable value) {
     }
 }

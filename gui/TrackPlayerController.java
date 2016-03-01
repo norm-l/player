@@ -3,8 +3,7 @@ package player.gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.application.Platform;
-import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +20,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import player.logic.TimeListener;
 import player.logic.TrackPlayer;
 import player.logic.model.DataModel;
 import player.logic.model.Track;
@@ -83,60 +83,6 @@ public class TrackPlayerController implements Initializable {
             });
             return row;
         });
-        
-        //player.currentTimeProperty().addListener((Observable ov) -> {
-        //    updateValues();
-        //});
-        //player.setOnReady(() -> {
-        //    duration = player.getMedia().getDuration();
-        //    updateValues();
-        //});
-    }
-
-    protected void updateValues() {
-        if (runTime != null) {
-            Platform.runLater(() -> {
-                Duration currentTime = player.getCurrentTime();
-                runTime.setText(formatTime(currentTime, duration));
-            });
-        }
-    }
-
-    private static String formatTime(Duration elapsed, Duration duration) {
-        int intElapsed = (int) Math.floor(elapsed.toSeconds());
-        int elapsedHours = intElapsed / (60 * 60);
-        if (elapsedHours > 0) {
-            intElapsed -= elapsedHours * 60 * 60;
-        }
-        int elapsedMinutes = intElapsed / 60;
-        int elapsedSeconds = intElapsed - elapsedHours * 60 * 60
-                - elapsedMinutes * 60;
-
-        if (duration.greaterThan(Duration.ZERO)) {
-            int intDuration = (int) Math.floor(duration.toSeconds());
-            int durationHours = intDuration / (60 * 60);
-            if (durationHours > 0) {
-                intDuration -= durationHours * 60 * 60;
-            }
-            int durationMinutes = intDuration / 60;
-            int durationSeconds = intDuration - durationHours * 60 * 60
-                    - durationMinutes * 60;
-            if (durationHours > 0) {
-                return String.format("%d:%02d:%02d/%d:%02d:%02d",
-                        elapsedHours, elapsedMinutes, elapsedSeconds,
-                        durationHours, durationMinutes, durationSeconds);
-            } else {
-                return String.format("%02d:%02d/%02d:%02d",
-                        elapsedMinutes, elapsedSeconds, durationMinutes,
-                        durationSeconds);
-            }
-        } else if (elapsedHours > 0) {
-            return String.format("%d:%02d:%02d", elapsedHours,
-                    elapsedMinutes, elapsedSeconds);
-        } else {
-            return String.format("%02d:%02d", elapsedMinutes,
-                    elapsedSeconds);
-        }
     }
 
     @FXML
@@ -146,6 +92,7 @@ public class TrackPlayerController implements Initializable {
             track = playingTable.getSelectionModel().getSelectedItem();
             player = new TrackPlayer(track.getFilePath());
             player.playSong();
+            duration = player.getDuration();
         } else if (player.getStatus() != null) {
             switch (player.getStatus()) {
                 case PAUSED:
@@ -200,5 +147,9 @@ public class TrackPlayerController implements Initializable {
         }
         this.model = model;
         playingTable.setItems(model.getTrackList());
+    }
+
+    public void setTime(String time) {
+        //runTime.setText();
     }
 }
