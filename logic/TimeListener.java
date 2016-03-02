@@ -9,6 +9,6 @@ public class TimeListener implements ChangeListener<Duration> {
 
     @Override
     public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
-        TrackPlayerController.setTime(newValue.toString());
+        //TrackPlayerController.setTime(newValue.toString());
     }
 }

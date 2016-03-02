@@ -83,6 +83,12 @@ public class TrackPlayerController implements Initializable {
             });
             return row;
         });
+
+        player.currentTimeProperty().addListener(observable -> {
+            setTime(player.getCurrentTime()
+                    + " / "
+                    + player.getTotalDuration());
+        });
     }
 
     @FXML
@@ -150,6 +156,6 @@ public class TrackPlayerController implements Initializable {
     }
 
     public void setTime(String time) {
-        //runTime.setText();
+        runTime.setText(time);
     }
 }
