@@ -2,6 +2,8 @@ package player.gui;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,13 +20,7 @@ public class TrackSearchController implements Initializable {
 
     // -----------------------------------------------------
     @FXML
-    private Button search;
-    @FXML
-    private TextField titleField;
-    @FXML
-    private TextField artistField;
-    @FXML
-    private TextField genreField;
+    private TextField searchField;
     @FXML
     private Button add;
     @FXML
@@ -56,9 +52,7 @@ public class TrackSearchController implements Initializable {
             TableRow<Track> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    Track rowData = row.getItem();
-                    model.getTrackList().add(rowData);
-                    searchTable.getSelectionModel().clearSelection();
+                    add();
                 }
             });
             return row;
@@ -66,7 +60,7 @@ public class TrackSearchController implements Initializable {
     }
 
     @FXML
-    private void add(ActionEvent e) {
+    private void add() {
         Track row = searchTable.getSelectionModel().getSelectedItem();
         if (row != null) {
             model.getTrackList().add(row);
@@ -86,6 +80,39 @@ public class TrackSearchController implements Initializable {
         }
         model.loadData();
         this.model = model;
-        searchTable.setItems(model.getTrackSearchList());
+
+         // Wrap the ObservableList in a FilteredList (initially display all data)
+        FilteredList<Track> filteredData = new FilteredList<>(model.getTrackSearchList(), p -> true);
+
+        // Set the filter Predicate whenever the filter changes
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredData.setPredicate(track -> {
+                // If filter text is empty, display all tracks
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+
+                // Compare title, artist and genre of every song with filter text
+                String lowerCaseFilter = newValue.toLowerCase();
+
+                if (track.getTrackTitle().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches track name
+                } else if (track.getTrackArtist().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches track artist
+                } else if (track.getTrackGenre().toLowerCase().contains(lowerCaseFilter)) {
+                    return true; // Filter matches track genre
+                }
+                return false; // Does not match
+            });
+        });
+
+        // Wrap the FilteredList in a SortedList
+        SortedList<Track> sortedData = new SortedList<>(filteredData);
+
+        // Bind the SortedList comparator to the TableView comparator
+        sortedData.comparatorProperty().bind(searchTable.comparatorProperty());
+
+        // Add sorted (and filtered) data to the table.
+        searchTable.setItems(sortedData);
     }
 }

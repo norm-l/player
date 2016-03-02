@@ -3,7 +3,6 @@ package player.gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,7 +19,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import player.logic.TimeListener;
 import player.logic.TrackPlayer;
 import player.logic.model.DataModel;
 import player.logic.model.Track;
@@ -74,6 +72,14 @@ public class TrackPlayerController implements Initializable {
         playingGenreCol.setCellValueFactory(new PropertyValueFactory<>("TrackGenre"));
         playingRunTimeCol.setCellValueFactory(new PropertyValueFactory<>("RunTime"));
 
+        if (player != null) {
+            player.currentTimeProperty().addListener(observable -> {
+                runTime.setText(player.getCurrentTime()
+                        + " / "
+                        + player.getTotalDuration());
+            });
+        }
+
         playingTable.setRowFactory(tv -> { // Function for double-click to play (load)
             TableRow<Track> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -82,12 +88,6 @@ public class TrackPlayerController implements Initializable {
                 }
             });
             return row;
-        });
-
-        player.currentTimeProperty().addListener(observable -> {
-            setTime(player.getCurrentTime()
-                    + " / "
-                    + player.getTotalDuration());
         });
     }
 
@@ -153,9 +153,5 @@ public class TrackPlayerController implements Initializable {
         }
         this.model = model;
         playingTable.setItems(model.getTrackList());
-    }
-
-    public void setTime(String time) {
-        runTime.setText(time);
     }
 }
